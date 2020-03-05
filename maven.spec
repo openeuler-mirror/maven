@@ -12,6 +12,8 @@ Source0:           http://archive.apache.org/dist/%{name}/%{name}-3/%{version}/s
 Source1:           maven-bash-completion
 Source2:           mvn.1
 
+Patch0000:         Revert-MNG-6335-Update-Mockito-to-2.12.0.patch
+
 BuildRequires:     maven-local mvn(com.google.guava:guava:20.0) mvn(com.google.inject:guice::no_aop:) mvn(commons-cli:commons-cli)
 BuildRequires:     mvn(commons-jxpath:commons-jxpath) mvn(javax.annotation:jsr250-api) mvn(javax.inject:javax.inject)
 BuildRequires:     mvn(junit:junit) mvn(org.apache.commons:commons-lang3) mvn(org.apache.maven:maven-parent:pom:)

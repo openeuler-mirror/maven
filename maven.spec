@@ -4,7 +4,7 @@
 Name:              maven
 Epoch:             1
 Version:           3.5.4
-Release:           3
+Release:           5
 Summary:           A tool can be used for building and managing any Java-based project
 License:           ASL 2.0
 URL:               http://maven.apache.org/
@@ -13,6 +13,7 @@ Source1:           maven-bash-completion
 Source2:           mvn.1
 
 Patch0000:         Revert-MNG-6335-Update-Mockito-to-2.12.0.patch
+Patch0001:         Adapt-mvn-script.patch
 
 BuildRequires:     maven-local mvn(com.google.guava:guava:20.0) mvn(com.google.inject:guice::no_aop:) mvn(commons-cli:commons-cli)
 BuildRequires:     mvn(commons-jxpath:commons-jxpath) mvn(javax.annotation:jsr250-api) mvn(javax.inject:javax.inject)
@@ -131,5 +132,11 @@ fi
 %ghost %{_mandir}/man1/mvn*.gz
 
 %changelog
+* Fri Mar 06 2020 lihao <lihao129@huawei.com> - 1:3.5.4-5
+- Fix incorrect maven home path
+
+* Fri Mar 06 2020 lihao <lihao129@huawei.com> - 1:3.5.4-4
+- Use Mockito 1.x instead of 2.x
+
 * Fri Dec  6 2019 lingsheng <lingsheng@huawei.com> - 1:3.5.4-3
 - Package init

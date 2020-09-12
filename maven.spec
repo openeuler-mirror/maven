@@ -5,7 +5,7 @@
 Name:                maven
 Epoch:               1
 Version:             3.5.4
-Release:             6
+Release:             7
 Summary:             Java project management and project comprehension tool
 License:             ASL 2.0 and MIT
 URL:                 http://maven.apache.org/
@@ -99,7 +99,7 @@ rm apache-maven/src/main/appended-resources/META-INF/LICENSE.vm
 %pom_remove_plugin -r :buildnumber-maven-plugin
 sed -i "
 /buildNumber=/ {
-  s/=.*/=Red Hat %{version}-%{release}/
+  s/=.*/=openEuler %{version}-%{release}/
   s/%{dist}$//
 }
 /timestamp=/ d
@@ -175,6 +175,9 @@ update-alternatives --install %{_bindir}/mvn mvn %{homedir}/bin/mvn %{?maven_alt
 %license LICENSE NOTICE
 
 %changelog
+* Sat Sep 12 2020 yaokai13 <yaokai13@huawei.com> - 1:3.5.4-7
+- Fix the spelling mistakes
+
 * Thu Sep 3 2020 leiju <leiju4@huawei.com> - 1:3.5.4-6
 - Fix the build error
 

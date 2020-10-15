@@ -5,7 +5,7 @@
 Name:                maven
 Epoch:               1
 Version:             3.5.4
-Release:             7
+Release:             8
 Summary:             Java project management and project comprehension tool
 License:             ASL 2.0 and MIT
 URL:                 http://maven.apache.org/
@@ -52,7 +52,7 @@ BuildRequires:       mvn(ch.qos.logback:logback-classic)
 Requires:            %{name}-lib = %{epoch}:%{version}-%{release}
 Requires(post): /usr/sbin/update-alternatives
 Requires(postun): /usr/sbin/update-alternatives
-Requires:            java-devel
+Requires:            java-1.8.0-devel
 Requires:            aopalliance apache-commons-cli apache-commons-codec apache-commons-io
 Requires:            apache-commons-lang3 apache-commons-logging atinject cdi-api
 Requires:            geronimo-annotation google-guice guava20 hawtjni-runtime httpcomponents-client
@@ -175,6 +175,9 @@ update-alternatives --install %{_bindir}/mvn mvn %{homedir}/bin/mvn %{?maven_alt
 %license LICENSE NOTICE
 
 %changelog
+* Thu 15 Oct 2020 lingsheng <lingsheng@huawei.com> - 1:3.5.4-8
+- Change require to java-1.8.0-devel
+
 * Sat Sep 12 2020 yaokai13 <yaokai13@huawei.com> - 1:3.5.4-7
 - Fix the spelling mistakes
 

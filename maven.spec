@@ -5,7 +5,7 @@
 Name:                maven
 Epoch:               1
 Version:             3.5.4
-Release:             8
+Release:             9
 Summary:             Java project management and project comprehension tool
 License:             ASL 2.0 and MIT
 URL:                 http://maven.apache.org/
@@ -14,6 +14,7 @@ Source1:             maven-bash-completion
 Source2:             mvn.1
 Patch1:              0001-Adapt-mvn-script.patch
 Patch2:              0002-Invoke-logback-via-reflection.patch
+Patch3:              CVE-2021-26291.patch
 BuildRequires:       maven-local mvn(com.google.guava:guava:20.0)
 BuildRequires:       mvn(com.google.inject:guice::no_aop:) mvn(commons-cli:commons-cli)
 BuildRequires:       mvn(commons-jxpath:commons-jxpath) mvn(javax.annotation:jsr250-api)
@@ -88,6 +89,7 @@ Summary:             API documentation for %{name}
 %prep
 %setup -q -n apache-%{name}-%{version}
 %patch1 -p1
+%patch3 -p1
 find -name '*.jar' -not -path '*/test/*' -delete
 find -name '*.class' -delete
 find -name '*.bat' -delete
@@ -175,6 +177,9 @@ update-alternatives --install %{_bindir}/mvn mvn %{homedir}/bin/mvn %{?maven_alt
 %license LICENSE NOTICE
 
 %changelog
+* Fri 16 Jul 2021 wutao <wutao61@huawei.com> - 1:3.5.4-9
+- fix CVE-2021-26291
+
 * Thu 15 Oct 2020 lingsheng <lingsheng@huawei.com> - 1:3.5.4-8
 - Change require to java-1.8.0-devel
 

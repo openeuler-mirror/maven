@@ -5,7 +5,7 @@
 Name:                maven
 Epoch:               1
 Version:             3.5.4
-Release:             9
+Release:             10
 Summary:             Java project management and project comprehension tool
 License:             ASL 2.0 and MIT
 URL:                 http://maven.apache.org/
@@ -154,7 +154,7 @@ update-alternatives --install %{_bindir}/mvn mvn %{homedir}/bin/mvn %{?maven_alt
 --slave %{_mandir}/man1/mvnDebug.1.gz mvnDebug1 %{homedir}/bin/mvn.1.gz \
 
 %postun
-[[ $1 -eq 0 ]] && update-alternatives --remove mvn %{homedir}/bin/mvn
+if [[ $1 -eq 0 ]]; then update-alternatives --remove mvn %{homedir}/bin/mvn; fi
 
 %files lib -f .mfiles
 %doc README.md
@@ -177,10 +177,13 @@ update-alternatives --install %{_bindir}/mvn mvn %{homedir}/bin/mvn %{?maven_alt
 %license LICENSE NOTICE
 
 %changelog
-* Fri 16 Jul 2021 wutao <wutao61@huawei.com> - 1:3.5.4-9
+* Sat Jul 24 2021 wangyue <wangyue92@huawei.com> - 1:3.5.4-10
+- fix maven downgrade error
+
+* Fri Jul 16 2021 wutao <wutao61@huawei.com> - 1:3.5.4-9
 - fix CVE-2021-26291
 
-* Thu 15 Oct 2020 lingsheng <lingsheng@huawei.com> - 1:3.5.4-8
+* Thu Oct 15 2020 lingsheng <lingsheng@huawei.com> - 1:3.5.4-8
 - Change require to java-1.8.0-devel
 
 * Sat Sep 12 2020 yaokai13 <yaokai13@huawei.com> - 1:3.5.4-7

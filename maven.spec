@@ -5,7 +5,7 @@
 Name:                maven
 Epoch:               1
 Version:             3.5.4
-Release:             10
+Release:             11
 Summary:             Java project management and project comprehension tool
 License:             ASL 2.0 and MIT
 URL:                 http://maven.apache.org/
@@ -177,6 +177,9 @@ if [[ $1 -eq 0 ]]; then update-alternatives --remove mvn %{homedir}/bin/mvn; fi
 %license LICENSE NOTICE
 
 %changelog
+* Fri Feb 25 2022 wangkai <wangkai385@huawei.com> - 1:3.5.4-11
+- Rebuild for fix log4j1.x cves
+
 * Sat Jul 24 2021 wangyue <wangyue92@huawei.com> - 1:3.5.4-10
 - fix maven downgrade error
 

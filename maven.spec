@@ -4,24 +4,27 @@
 %global confdir %{_sysconfdir}/%{name}%{?maven_version_suffix}
 Name:                maven
 Epoch:               1
-Version:             3.5.4
-Release:             10
+Version:             3.6.3
+Release:             1
 Summary:             Java project management and project comprehension tool
 License:             ASL 2.0 and MIT
 URL:                 http://maven.apache.org/
 Source0:             http://archive.apache.org/dist/maven/maven-3/%{version}/source/apache-maven-%{version}-src.tar.gz
 Source1:             maven-bash-completion
 Source2:             mvn.1
-Patch1:              0001-Adapt-mvn-script.patch
-Patch2:              0002-Invoke-logback-via-reflection.patch
-Patch3:              CVE-2021-26291.patch
-BuildRequires:       maven-local mvn(com.google.guava:guava:20.0)
+Patch1:              0001-adapt-mvn-script.patch
+Patch2:              0002-invoke-logback-via-reflection.patch
+Patch3:              0003-use-non-shaded-HTTP-wagon.patch
+Patch4:              0004-remove-dependency-on-powermock.patch
+
+BuildRequires:       maven-local
 BuildRequires:       mvn(com.google.inject:guice::no_aop:) mvn(commons-cli:commons-cli)
 BuildRequires:       mvn(commons-jxpath:commons-jxpath) mvn(javax.annotation:jsr250-api)
 BuildRequires:       mvn(javax.inject:javax.inject) mvn(junit:junit)
 BuildRequires:       mvn(org.apache.commons:commons-lang3) mvn(org.apache.maven:maven-parent:pom:)
 BuildRequires:       mvn(org.apache.maven.plugins:maven-assembly-plugin)
 BuildRequires:       mvn(org.apache.maven.plugins:maven-dependency-plugin)
+BuildRequires:       mvn(org.apache.maven.plugins:maven-failsafe-plugin)
 BuildRequires:       mvn(org.apache.maven.resolver:maven-resolver-api)
 BuildRequires:       mvn(org.apache.maven.resolver:maven-resolver-connector-basic)
 BuildRequires:       mvn(org.apache.maven.resolver:maven-resolver-impl)
@@ -30,29 +33,31 @@ BuildRequires:       mvn(org.apache.maven.resolver:maven-resolver-transport-wago
 BuildRequires:       mvn(org.apache.maven.resolver:maven-resolver-util)
 BuildRequires:       mvn(org.apache.maven.shared:maven-shared-utils)
 BuildRequires:       mvn(org.apache.maven.wagon:wagon-file)
-BuildRequires:       mvn(org.apache.maven.wagon:wagon-http::shaded:)
+BuildRequires:       mvn(org.apache.maven.wagon:wagon-http)
 BuildRequires:       mvn(org.apache.maven.wagon:wagon-provider-api)
-BuildRequires:       mvn(org.codehaus.modello:modello-maven-plugin)
+BuildRequires:       mvn(org.codehaus.modello:modello-maven-plugin) >= 1.11
 BuildRequires:       mvn(org.codehaus.mojo:build-helper-maven-plugin)
 BuildRequires:       mvn(org.codehaus.plexus:plexus-classworlds)
 BuildRequires:       mvn(org.codehaus.plexus:plexus-component-annotations)
 BuildRequires:       mvn(org.codehaus.plexus:plexus-component-metadata)
 BuildRequires:       mvn(org.codehaus.plexus:plexus-interpolation)
-BuildRequires:       mvn(org.codehaus.plexus:plexus-utils)
+BuildRequires:       mvn(org.codehaus.plexus:plexus-utils) >= 3.2.0
 BuildRequires:       mvn(org.eclipse.sisu:org.eclipse.sisu.inject)
 BuildRequires:       mvn(org.eclipse.sisu:org.eclipse.sisu.plexus)
 BuildRequires:       mvn(org.eclipse.sisu:sisu-maven-plugin) mvn(org.fusesource.jansi:jansi)
+BuildRequires:       mvn(org.hamcrest:hamcrest-library)
+BuildRequires:       mvn(org.jsoup:jsoup)
 BuildRequires:       mvn(org.mockito:mockito-core) >= 2 mvn(org.slf4j:jcl-over-slf4j)
 BuildRequires:       mvn(org.slf4j:slf4j-api) mvn(org.slf4j:slf4j-simple)
 BuildRequires:       mvn(org.sonatype.plexus:plexus-cipher)
-BuildRequires:       mvn(org.sonatype.plexus:plexus-sec-dispatcher) mvn(xmlunit:xmlunit)
+BuildRequires:       mvn(org.sonatype.plexus:plexus-sec-dispatcher) mvn(org.xmlunit:xmlunit-core) mvn(org.xmlunit:xmlunit-matchers)
 BuildRequires:       slf4j-sources = %{bundled_slf4j_version}
 %if %{with logback}
 BuildRequires:       mvn(ch.qos.logback:logback-classic)
 %endif
 Requires:            %{name}-lib = %{epoch}:%{version}-%{release}
-Requires(post): /usr/sbin/update-alternatives
-Requires(postun): /usr/sbin/update-alternatives
+Requires(post):      /usr/sbin/update-alternatives
+Requires(postun):    /usr/sbin/update-alternatives
 Requires:            java-1.8.0-devel
 Requires:            aopalliance apache-commons-cli apache-commons-codec apache-commons-io
 Requires:            apache-commons-lang3 apache-commons-logging atinject cdi-api
@@ -90,9 +95,11 @@ Summary:             API documentation for %{name}
 %setup -q -n apache-%{name}-%{version}
 %patch1 -p1
 %patch3 -p1
+%patch4 -p1
 find -name '*.jar' -not -path '*/test/*' -delete
 find -name '*.class' -delete
 find -name '*.bat' -delete
+%pom_remove_dep -r :powermock-reflect
 sed -i 's:\r::' apache-maven/src/conf/settings.xml
 rm apache-maven/src/main/appended-resources/META-INF/LICENSE.vm
 %pom_remove_plugin -r :animal-sniffer-maven-plugin
@@ -113,6 +120,14 @@ sed -i "
 %endif
 %mvn_alias :maven-resolver-provider :maven-aether-provider
 
+%pom_xpath_inject 'pom:build/pom:plugins' '
+<plugin>
+    <groupId>org.eclipse.sisu</groupId>
+    <artifactId>sisu-maven-plugin</artifactId>
+</plugin>' maven-model-builder/pom.xml
+
+%pom_xpath_set "//pom:dependency[pom:artifactId='jansi']/pom:version" 1.18
+
 %build
 %mvn_build -- -Dproject.build.sourceEncoding=UTF-8
 mkdir m2home
@@ -129,7 +144,7 @@ install -d -m 755 %{buildroot}%{_datadir}/bash-completion/completions/
 cp -a $M2_HOME/{bin,lib,boot} %{buildroot}%{homedir}/
 xmvn-subst -R %{buildroot} -s %{buildroot}%{homedir}
 build-jar-repository -s -p %{buildroot}%{homedir}/lib \
-    commons-{codec,logging} httpcomponents/{httpclient,httpcore} maven-wagon/http-shared
+    httpcomponents/{httpclient,httpcore} maven-wagon/http-shared
 rm %{buildroot}%{homedir}/lib/jboss-interceptors*.jar
 rm %{buildroot}%{homedir}/lib/javax.el-api*.jar
 ln -s %{_jnidir}/jansi-native/jansi-linux.jar %{buildroot}%{homedir}/lib/
@@ -177,6 +192,9 @@ if [[ $1 -eq 0 ]]; then update-alternatives --remove mvn %{homedir}/bin/mvn; fi
 %license LICENSE NOTICE
 
 %changelog
+* Mon Feb 21 2022 Ge Wang <wangge20@huawei.com> - 1:3.6.3-1
+- upgrade to version 3.6.3
+
 * Sat Jul 24 2021 wangyue <wangyue92@huawei.com> - 1:3.5.4-10
 - fix maven downgrade error
 
